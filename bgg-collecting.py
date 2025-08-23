@@ -41,21 +41,56 @@ for i in tqdm(range(0, len(game_ids), BATCH_SIZE), desc="배치 처리 중"):
         root = ET.fromstring(response.content)
         for item in root.findall('item'):
             game_id = int(item.get('id'))
-            # 일부 게임은 이름이 여러 개일 수 있으므로 primary 이름을 가져옵니다.
             name_element = item.find("name[@type='primary']")
             name = name_element.get('value') if name_element is not None else "N/A"
             
+            yearpublished = item.find('yearpublished').get('value')
+
             stats = item.find('statistics/ratings')
             average = float(stats.find('average').get('value'))
             weight = float(stats.find('averageweight').get('value'))
             usersrated = float(stats.find('usersrated').get('value'))
+
+            # 추천 인원수 계산
+            recommended_players = []
+            poll = item.find("poll[@name='suggested_numplayers']")
+            if poll is not None:
+                for results in poll.findall('results'):
+                    num_players = results.get('numplayers')
+                    if '+' in num_players:
+                        continue
+                    
+                    best_votes = 0
+                    recommended_votes = 0
+                    not_recommended_votes = 0
+                    
+                    best_element = results.find("result[@value='Best']")
+                    if best_element is not None:
+                        best_votes = int(best_element.get('numvotes'))
+                    
+                    recommended_element = results.find("result[@value='Recommended']")
+                    if recommended_element is not None:
+                        recommended_votes = int(recommended_element.get('numvotes'))
+
+                    not_recommended_element = results.find("result[@value='Not Recommended']")
+                    if not_recommended_element is not None:
+                        not_recommended_votes = int(not_recommended_element.get('numvotes'))
+
+                    total_votes = best_votes + recommended_votes + not_recommended_votes
+                    
+                    if (best_votes + recommended_votes) > (total_votes / 2):
+                        recommended_players.append(num_players)
             
+            recommended_players_str = '|'.join(recommended_players)
+
             all_game_data.append({
                 'id': game_id,
                 'name': name,
+                'yearpublished': yearpublished,
                 'average': average,
                 'weight': weight,
-                'usersrated': usersrated
+                'usersrated': usersrated,
+                'recommended_players': recommended_players_str
             })
     except requests.exceptions.RequestException as e:
         print(f"   API 요청 중 오류가 발생했습니다: {e}")

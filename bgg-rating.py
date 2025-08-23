@@ -74,7 +74,7 @@ df_final.rename(columns={'rank': 'original_rank'}, inplace=True)
 
 # 컬럼 순서를 정리합니다.
 output_columns = [
-    'new_rank', 'original_rank', 'id', 'name', 'weight', 'average',
+    'new_rank', 'original_rank', 'id', 'name', 'yearpublished', 'recommended_players', 'weight', 'average',
     'rating_difference', 'bayes_new_rating', 'rating_change'
 ]
 # 'original_rank'가 없는 경우를 대비하여 있는 컬럼만 선택
@@ -89,6 +89,6 @@ print(f"   새로운 순위 데이터를 '{OUTPUT_CSV_PATH}'에 성공적으로 
 # --- 4. 상위 100개 결과 출력 ---
 print("\n--- Top 100 Re-ranked Board Games ---")
 # 보기 좋게 출력하기 위해 to_string()을 사용하고 인덱스는 제외합니다.
-print(df_final[['new_rank', 'original_rank', 'name', 'weight', 'bayes_new_rating']].head(100).to_string(index=False))
+print(df_final[['new_rank', 'original_rank', 'name', 'yearpublished', 'recommended_players', 'weight', 'bayes_new_rating']].head(100).to_string(index=False))
 
 print("\n계산 작업이 완료되었습니다!")
