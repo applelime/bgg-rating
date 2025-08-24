@@ -44,6 +44,7 @@ for i in tqdm(range(0, len(game_ids), BATCH_SIZE), desc="배치 처리 중"):
             name_element = item.find("name[@type='primary']")
             name = name_element.get('value') if name_element is not None else "N/A"
             
+            thumbnail = item.find('thumbnail').text
             yearpublished = item.find('yearpublished').get('value')
 
             stats = item.find('statistics/ratings')
@@ -90,7 +91,8 @@ for i in tqdm(range(0, len(game_ids), BATCH_SIZE), desc="배치 처리 중"):
                 'average': average,
                 'weight': weight,
                 'usersrated': usersrated,
-                'recommended_players': recommended_players_str
+                'recommended_players': recommended_players_str,
+                'thumbnail': thumbnail
             })
     except requests.exceptions.RequestException as e:
         print(f"   API 요청 중 오류가 발생했습니다: {e}")
