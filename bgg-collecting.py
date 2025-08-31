@@ -4,11 +4,14 @@ import xml.etree.ElementTree as ET
 import time
 from tqdm import tqdm
 from datetime import date
+import os
 
 # --- 설정 ---
 INPUT_CSV_PATH = 'boardgames_ranks.csv'
 # 오늘 날짜를 포함한 출력 파일 경로 설정
-OUTPUT_CSV_PATH = f'bgg_data_{date.today().strftime("%Y-%m-%d")}.csv'
+OUTPUT_DIR = 'bgg_data'
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+OUTPUT_CSV_PATH = os.path.join(OUTPUT_DIR, f'bgg_data_{date.today().strftime("%Y-%m-%d")}.csv')
 TOP_N_GAMES = 5000
 BGG_API_ENDPOINT = 'https://www.boardgamegeek.com/xmlapi2/thing'
 BATCH_SIZE = 20
@@ -41,14 +44,26 @@ for i in tqdm(range(0, len(game_ids), BATCH_SIZE), desc="배치 처리 중"):
         root = ET.fromstring(response.content)
         for item in root.findall('item'):
             game_id = int(item.get('id'))
-            name_element = item.find("name[@type='primary']")
-            name = name_element.get('value') if name_element is not None else "N/A"
             
+            # 이름 정보 추출 (기본 이름 및 한국어 이름)
+            name = "N/A"
+            korean_name = ""
+            for name_element in item.findall('name'):
+                if name_element.get('type') == 'primary':
+                    name = name_element.get('value')
+                # 한국어 이름인지 확인 (정확한 언어 태그가 없으므로, 한글 포함 여부로 판단)
+                elif name_element.get('type') == 'alternate':
+                    alternate_name = name_element.get('value')
+                    # 한글 음절 범위 (가-힣)에 해당하는 문자가 있는지 확인
+                    if any('\uac00' <= char <= '\ud7a3' for char in alternate_name):
+                        korean_name = alternate_name
+
             thumbnail = item.find('thumbnail').text
             yearpublished = item.find('yearpublished').get('value')
 
             stats = item.find('statistics/ratings')
             average = float(stats.find('average').get('value'))
+            bayesaverage = float(stats.find('bayesaverage').get('value'))
             weight = float(stats.find('averageweight').get('value'))
             usersrated = float(stats.find('usersrated').get('value'))
 
@@ -87,8 +102,10 @@ for i in tqdm(range(0, len(game_ids), BATCH_SIZE), desc="배치 처리 중"):
             all_game_data.append({
                 'id': game_id,
                 'name': name,
+                'korean_name': korean_name,
                 'yearpublished': yearpublished,
                 'average': average,
+                'rating': bayesaverage,
                 'weight': weight,
                 'usersrated': usersrated,
                 'recommended_players': recommended_players_str,

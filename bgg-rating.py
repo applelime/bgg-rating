@@ -3,6 +3,7 @@ from sklearn.linear_model import LinearRegression
 from datetime import date
 import numpy as np
 import math
+import os
 
 def truncate_float(x: float, n: int) -> float:
     factor = 10 ** n
@@ -10,8 +11,11 @@ def truncate_float(x: float, n: int) -> float:
 
 # --- 설정 ---
 # 오늘 날짜를 기준으로 데이터 파일 경로 설정
-INPUT_DATA_PATH = f'bgg_data_{date.today().strftime("%Y-%m-%d")}.csv'
-OUTPUT_CSV_PATH = f'boardgames_re_ranked_{date.today().strftime("%Y-%m-%d")}.csv'
+INPUT_DATA_DIR = 'bgg_data'
+INPUT_DATA_PATH = os.path.join(INPUT_DATA_DIR, f'bgg_data_{date.today().strftime("%Y-%m-%d")}.csv')
+OUTPUT_DIR = 'reranked'
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+OUTPUT_CSV_PATH = os.path.join(OUTPUT_DIR, f'boardgames_reranked_{date.today().strftime("%Y-%m-%d")}.csv')
 
 # --- 1. 오늘 날짜로 수집된 데이터 불러오기 ---
 print(f"1. '{INPUT_DATA_PATH}' 파일에서 데이터 불러오는 중...")
@@ -74,8 +78,8 @@ df_final.rename(columns={'rank': 'original_rank'}, inplace=True)
 
 # 컬럼 순서를 정리합니다.
 output_columns = [
-    'new_rank', 'original_rank', 'id', 'name', 'yearpublished', 'recommended_players', 'weight', 'average',
-    'rating_difference', 'bayes_new_rating', 'rating_change', 'thumbnail'
+    'new_rank', 'original_rank', 'id', 'name', 'korean_name', 'yearpublished', 'recommended_players', 'weight', 'average',
+    'rating', 'rating_difference', 'bayes_new_rating', 'rating_change', 'thumbnail'
 ]
 # 'original_rank'가 없는 경우를 대비하여 있는 컬럼만 선택
 output_columns = [col for col in output_columns if col in df_final.columns]
