@@ -13,8 +13,25 @@ OUTPUT_DIR = 'bgg_data'
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 OUTPUT_CSV_PATH = os.path.join(OUTPUT_DIR, f'bgg_data_{date.today().strftime("%Y-%m-%d")}.csv')
 TOP_N_GAMES = 5000
-BGG_API_ENDPOINT = 'https://www.boardgamegeek.com/xmlapi2/thing'
 BATCH_SIZE = 20
+BGG_API_ENDPOINT = 'https://boardgamegeek.com/xmlapi2/thing'
+BGG_TOKEN_PATH = 'bgg-token'
+
+# --- BGG 토큰 읽기 ---
+try:
+    with open(BGG_TOKEN_PATH, 'r') as f:
+        bgg_token = f.read().strip()
+except FileNotFoundError:
+    print(f"   오류: '{BGG_TOKEN_PATH}' 파일을 찾을 수 없습니다.")
+    bgg_token = None
+
+if not bgg_token:
+    print("   BGG 토큰 파일이 없습니다.")
+    exit()
+
+headers = {
+    'Authorization': f'Bearer {bgg_token}'
+}
 
 # --- 1. CSV 파일에서 상위 N개 게임 ID 추출 ---
 print(f"1. '{INPUT_CSV_PATH}'에서 상위 {TOP_N_GAMES}개 게임 불러오는 중...")
@@ -39,7 +56,7 @@ for i in tqdm(range(0, len(game_ids), BATCH_SIZE), desc="배치 처리 중"):
     ids_str = ','.join(map(str, batch_ids))
     url = f"{BGG_API_ENDPOINT}?id={ids_str}&stats=1"
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         root = ET.fromstring(response.content)
         for item in root.findall('item'):

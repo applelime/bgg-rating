@@ -29,21 +29,27 @@ BGG API를 활용하여 게임의 상세 정보(평점, 복잡도, 평가자 수
 -   `Python 3.x`
 -   `pandas`
 -   `requests`
--   `scikit-learn`
 -   `tqdm`
 
 다음 명령어를 사용하여 필요한 라이브러리를 설치할 수 있습니다:
 
 ```bash
-pip install pandas requests scikit-learn tqdm
+pip install pandas requests tqdm
 ```
 
 ### 📁 데이터 준비
 
 **`boardgames_ranks.csv` 파일 다운로드**  
-BGG에서 제공하는 전체 랭킹 정보를 CSV 파일로 다운로드하여 프로젝트 루트 디렉토리에 저장해야 합니다.
+BGG에서 제공하는 전체 랭킹 정보를 CSV 파일로 다운로드하여 프로젝트 루트 디렉토리에 저장합니다.
 - 다운로드 링크: [https://boardgamegeek.com/data_dumps/bg_ranks/](https://boardgamegeek.com/data_dumps/bg_ranks/)
 - **참고**: 다운로드를 위해서는 BoardGameGeek 로그인이 필요할 수 있습니다.
+
+### 🔑 BGG API 인증 토큰 발급
+
+BGG API로 게임 정보를 수집하려면 인증 토큰이 필요합니다.  
+어플리케이션을 등록하여 인증 토큰을 발급받고, `bgg-token` 파일로 프로젝트 루트 디렉토리에 저장합니다.
+
+- BGG XML API 안내: [https://boardgamegeek.com/using_the_xml_api](https://boardgamegeek.com/using_the_xml_api)
 
 ## 🚀 사용법
 
@@ -74,12 +80,8 @@ BGG API를 통해 각 게임의 상세 정보(평점, 복잡도, 평가자 수 �
     python bgg-rating.py
     ```
 - **입력 파일:** `bgg_data_YYYY-MM-DD.csv` (1단계에서 생성된 파일)
-- **출력 파일:** `boardgames_re_ranked_YYYY-MM-DD.csv`
+- **출력 파일:** `boardgames_reranked_YYYY-MM-DD.csv`
 
 ## 📚 참고 자료
 
 -   [https://dvatvani.com/blog/bgg-analysis-part-2](https://dvatvani.com/blog/bgg-analysis-part-2)
-
-## 📅 최종 업데이트 (BGG 데이터 기준)
-
-2025년 08월 31일
